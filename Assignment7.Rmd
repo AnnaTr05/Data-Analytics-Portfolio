@@ -1,0 +1,260 @@
+---
+title: "Assignment7"
+output: html_document
+date: "2024-05-18"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+load("/Users/annatran/Downloads/sales_data (1).Rdata")
+head(sales)
+
+read_csv_function <- function(file_path) {
+  data <- read.csv(file_path)
+  return(data)
+}
+
+
+# Story 1: I want to see the month sales (Quanity*Price) by state from Jan 2019 to Jan 2020. 
+library(dplyr)
+library(lubridate)
+sales$Quantity <- as.numeric(sales$Quantity)
+sales$PriceEach <- as.numeric(sales$PriceEach)
+
+# Check if there are any NA values
+sum(is.na(sales$Quantity))
+sum(is.na(sales$PriceEach))
+
+# Make sure 'Date' is in Date format
+sales$Date <- as.Date(sales$Date)
+
+# Create a Month-Year column from Date
+sales$Month <- floor_date(sales$Date, unit = "month")
+
+# Calculate total sales per product line
+sales$Total_Sales <- sales$Quantity * sales$PriceEach
+
+# Summarize monthly sales by state
+monthly_sales_by_state <- sales %>%
+  group_by(Month, State) %>%
+  summarise(Monthly_Sales = sum(Total_Sales), .groups = 'drop')
+
+# View the summarized data
+head(monthly_sales_by_state)
+
+print(monthly_sales_by_state)
+
+library(ggplot2)
+# Aggregate sales data by month
+monthly_sales <- sales %>%
+  mutate(Month = floor_date(Date, "month")) %>%
+  group_by(Month, State) %>%
+  summarise(Total_Sales = sum(PriceEach * Quantity, na.rm = TRUE), .groups = 'drop')
+
+# Check the first few rows
+head(monthly_sales)
+
+ggplot(monthly_sales, aes(x = Month, y = Total_Sales, group = State, color = State)) +
+  geom_line() +
+  labs(title = "Monthly Sales Trends by State", x = "Month", y = "Total Sales (USD)") +
+  theme_minimal()
+```
+ ![screenshot1](/Users/annatran/Downloads/screenshot1.png)
+ 
+
+#Conclusion: I can see California (CA), Oregon (OR), and Texas (TX) are top 3 states that has the highest monthly sales.
+
+#Story 2: I want to see the top 5 products are being sold in California by month
+
+# Filter sales data for transactions in California
+sales_CA <- sales %>%
+  filter(State == "CA")
+
+# Calculate total quantity sold for each product
+product_summary_CA <- sales_CA %>%
+  group_by(Product) %>%
+  summarise(total_quantity = sum(Quantity))
+
+# Select the top 5 products sold in California
+top_5_products_CA <- product_summary_CA %>%
+  arrange(desc(total_quantity)) %>%
+  head(5)
+
+# Print the top 5 products
+
+# Filter sales data for transactions in California
+sales_CA <- sales %>%
+  filter(State == "CA")
+
+# Group the data by both Month and Product, and calculate total quantity sold
+product_summary_CA <- sales_CA %>%
+  group_by(Month, Product) %>%
+  summarise(total_quantity = sum(Quantity)) %>%
+  ungroup()
+
+# For each month, select the top 5 products sold in California
+top_5_products_by_month_CA <- product_summary_CA %>%
+  group_by(Month) %>%
+  top_n(5, total_quantity) %>%
+  arrange(Month, desc(total_quantity))
+
+# Print the top 5 products sold in California by month
+print(top_5_products_by_month_CA)
+
+library(ggplot2)
+
+# Filter sales data for transactions in California
+sales_CA <- sales %>%
+  filter(State == "CA")
+
+# Group the data by both Month and Product, and calculate total quantity sold
+product_summary_CA <- sales_CA %>%
+  group_by(Month, Product) %>%
+  summarise(total_quantity = sum(Quantity)) %>%
+  ungroup()
+
+# For each month, select the top 5 products sold in California
+top_5_products_by_month_CA <- product_summary_CA %>%
+  group_by(Month) %>%
+  top_n(5, total_quantity) %>%
+  arrange(Month, desc(total_quantity))
+
+# Plot the top 5 products sold in California by month
+ggplot(top_5_products_by_month_CA, aes(x = Month, y = total_quantity, color = Product)) +
+  geom_line() +
+  labs(title = "Top 5 Products Sold in California by Month",
+       x = "Month",
+       y = "Total Quantity Sold",
+       color = "Product") +
+  theme_minimal()
+#Conclusion: I can see AAA Batteries (4-pack) is the producst that has the highest monthly sales in California
+!["SC2"](/Users/annatran/Downloads/screenshot2.png)
+  
+#Story 3: I want to see the top 5 products are being sold in Oregon by month
+library(ggplot2)
+
+# Filter sales data for transactions in Oregon
+sales_OR <- sales %>%
+  filter(State == "OR")
+
+# Group the data by both Month and Product, and calculate total quantity sold
+product_summary_OR <- sales_OR %>%
+  group_by(Month, Product) %>%
+  summarise(total_quantity = sum(Quantity)) %>%
+  ungroup()
+
+# For each month, select the top 5 products sold in Oregon
+top_5_products_by_month_OR <- product_summary_OR %>%
+  group_by(Month) %>%
+  top_n(5, total_quantity) %>%
+  arrange(Month, desc(total_quantity))
+
+# Plot the top 5 products sold in Oregon by month
+ggplot(top_5_products_by_month_OR, aes(x = Month, y = total_quantity, color = Product)) +
+  geom_line() +
+  labs(title = "Top 5 Products Sold in Oregon by Month",
+       x = "Month",
+       y = "Total Quantity Sold",
+       color = "Product") +
+  theme_minimal()
+
+#Conclussion: I can see AAA Batteries (4-pack) is the producst that has the highest monthly sales in Oregon.
+![This is the caption!](/Users/annatran/Downloads/screenshot3.png)
+
+
+
+#4: I want to see the top 5 products are being sold in Texas by month
+library(ggplot2)
+
+# Filter sales data for transactions in Texas
+sales_TX <- sales %>%
+  filter(State == "TX")
+
+# Group the data by both Month and Product, and calculate total quantity sold
+product_summary_TX <- sales_TX %>%
+  group_by(Month, Product) %>%
+  summarise(total_quantity = sum(Quantity)) %>%
+  ungroup()
+
+# For each month, select the top 5 products sold in Texas
+top_5_products_by_month_TX <- product_summary_TX %>%
+  group_by(Month) %>%
+  top_n(5, total_quantity) %>%
+  arrange(Month, desc(total_quantity))
+
+# Plot the top 5 products sold in Texas by month
+ggplot(top_5_products_by_month_TX, aes(x = Month, y = total_quantity, color = Product)) +
+  geom_line() +
+  labs(title = "Top 5 Products Sold in Texas by Month",
+       x = "Month",
+       y = "Total Quantity Sold",
+       color = "Product") +
+  theme_minimal()
+  
+# I can see AAA Batteries (4-pack) is the producst that has the highest monthly sales in Texas.
+![This is the caption!](/Users/annatran/Downloads/screenshot4.png)
+  
+# Story 5: From graph 2,3,4, we can see AAA Batteries (4-pack) is always the products that get highest sales. Now , I want to find top 5 cities in California, Texas and Oregon that sell this item.
+library(ggplot2)
+
+# Filter sales data for transactions involving "AAA Batteries (4-pack)"
+batteries_data <- sales %>%
+  filter(Product == "AAA Batteries (4-pack)")
+
+# Filter the data for transactions in CA, OR, and TX
+batteries_data_filtered <- batteries_data %>%
+  filter(State %in% c("CA", "OR", "TX"))
+
+# Group the filtered data by state and city, and calculate total quantity sold
+city_summary <- batteries_data_filtered %>%
+  group_by(State, City) %>%
+  summarise(total_quantity = sum(Quantity)) %>%
+  ungroup()
+
+# Select the top 5 cities with the highest quantity sold within each state
+top_5_cities_by_state <- city_summary %>%
+  group_by(State) %>%
+  top_n(5, total_quantity) %>%
+  arrange(State, desc(total_quantity))
+
+# Filter the batteries data to include only the top 5 cities in CA, OR, and TX
+batteries_top_5_cities <- batteries_data_filtered %>%
+  filter(City %in% top_5_cities_by_state$City)
+
+# Plot the total quantity of "AAA Batteries (4-pack)" sold in the top 5 cities in CA, OR, and TX
+ggplot(batteries_top_5_cities, aes(x = City, y = Quantity, fill = City)) +
+  geom_bar(stat = "summary", fun = "sum") +
+  labs(title = "AAA Batteries (4-pack) Sales in Top 5 Cities (CA, OR, TX)",
+       x = "City",
+       y = "Total Quantity Sold") +
+  facet_wrap(~ State, scales = "free_x") +  # Separate plots for each state
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability.
+  
+#Conclussion: I can see Austin, Dallas, Los Angeles, Portland and San Francisco are the top 5 that has highest sales of AAA Batteries (4-pack). 
+![This is the caption!](/Users/annatran/Downloads/screenshot5.png)
+
+#Final thoughts: I believe these data will help the marketing know which product and which location they should pay attention to advertise for in order to raise our company's revenue in the next year.

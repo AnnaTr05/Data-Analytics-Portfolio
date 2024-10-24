@@ -1,0 +1,68 @@
+---
+title: "Assignmnet 6"
+output: html_document
+date: "2024-05-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+library(tidyverse) 
+install.packages("tidytuesdayR")
+wwbi_data <- tuesdata$wwbi_data
+wwbi_series <- tuesdata$wwbi_series
+wwbi_country <- tuesdata$wwbi_country
+
+
+To further filter the data based on the "indicator_code" column and the "year" column, you can use additional filtering conditions in your code. Here's how you can modify the previous code to achieve this:
+
+library(knitr)
+library(kableExtra)
+library(dplyr)
+vnm_data <- wwbi_data %>% filter(grepl("VNM", country_code))
+kable(vnm_data, "html") %>%
+  kable_styling()
+
+vnm_data <- wwbi_data %>%
+  filter(grepl("VNM", country_code)) %>%
+  filter(indicator_code == "BI.PWK.AGES.PB.SS.SM") %>%
+select(year, value, indicator_code, country_code)
+nm_data <- vnm_data %>%
+  mutate(across(where(is.numeric), ~round(., 6)))
+
+kable(vnm_data, "html") %>%
+  kable_styling()
+
+library(ggplot2)
+
+ggplot(vnm_data, aes(x = year, y = value)) +
+  geom_line() +
+  geom_text(aes(label = ifelse(year %in% c(2008, 2009, 2010), value, "")), vjust = -0.5) +
+  labs(title = "Vietnam's Mean age of public paid employees, by industry: Social Security",
+       x = "Year",
+       y = "Mean age") +
+
+  theme_minimal()
+  
+  ![](/Users/annatran/Downloads/screenshotforassignment6.png)
+ 

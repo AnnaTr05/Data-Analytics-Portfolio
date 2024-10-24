@@ -1,0 +1,85 @@
+---
+title: "Assignment Week 5"
+output:
+  html_document:
+    keep_md: yes
+date: "2024-04-26"
+knitr:
+  echo: TRUE
+
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax
+for authoring HTML, PDF, and MS Word documents. For more details on
+using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that
+includes both content as well as the output of any embedded R code
+chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=TRUE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to
+prevent printing of the R code that generated the plot.
+
+library(tidyverse) 
+install.packages("tidytuesdayR")
+outer_space_objects <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-04-23/outer_space_objects.csv')
+
+# Create table of number of objects for each country in 2023
+library(dplyr)
+library(ggplot2)
+
+entities_2023 <- outer_space_objects %>%
+  filter(Year == 2023)
+
+print(entities_2023)
+
+
+
+# Print the summary table of top 5 country in 2023
+library(dplyr)
+entities_2023 <- entities_2023 %>%
+  filter(Entity != "World")
+
+top_5 <- entities_2023 %>%
+  top_n(5, num_objects) %>%
+  arrange(desc(num_objects))
+
+print(top_5)
+
+
+column_colors <- c("skyblue", "orange", "green", "red", "purple")  # Add or change colors as needed
+
+# Create ggplot2
+ggplot(top_5, aes(x = reorder(Entity, num_objects), y = num_objects, fill = Entity)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = num_objects), vjust = -0.5, size = 3.5, color = "black") +
+  scale_fill_manual(values = column_colors) +  # Set custom column colors
+  labs(title = "Top 5 Country with the most objects in 2023",
+       x = "Country",
+       y = "Number of objects") +
+  theme_minimal()
+
+#mysketch
+![](/Users/annatran/Downloads/top5skecth.jpg)
+#finaloutput
+![](/Users/annatran/Downloads/top5country.png)
+
+
