@@ -1,0 +1,168 @@
+---
+title: "DataBUAN2OCT14"
+output: html_document
+date: "2024-10-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+songs <- read.csv("/Users/annatran/Downloads/american_idol_songs_v8.csv", header = TRUE)
+head(songs, 10)
+
+
+head(songs)
+
+str(songs)
+
+table(songs$Advance)
+
+2
+songs$Advance <- as.factor(songs$Advance)
+str(songs)
+
+t(t(names(songs)))
+
+songs <- songs[, c(4, 6, 10, 11, 7)]
+
+head(songs)
+
+str(songs)
+
+set.seed(666)
+train_index <- sample(1:nrow(songs), 0.7 * nrow(songs))
+valid_index <- setdiff(1:nrow(songs), train_index)
+
+train_df <- songs[train_index, ]
+valid_df <- songs[valid_index, ]
+
+nrow(train_df)
+nrow(valid_df)
+
+install.packages("caret")
+install.packages("lattice")
+install.packages("ggplot2")
+library(caret)
+library(lattice)
+library(ggplot2)
+
+
+logistic_reg <- train(Advance ~ Song_Avg_Rtg + Avg_Song_Age + Expectation +
+                      Artiste_Rating,
+                    data = train_df, method = "glm")
+summary(logistic_reg)
+
+varImp(logistic_reg)
+
+Predict the training set
+logistic_reg_pred_train <- predict(logistic_reg, 
+                               newdata = train_df, type = "raw")
+
+head(logistic_reg_pred_train)
+
+logistic_reg_pred_train_prob <- predict(logistic_reg, 
+                                   newdata = train_df, type = "prob")
+
+Predict the validation set
+logistic_reg_pred_valid <- predict(logistic_reg, 
+                                   newdata = valid_df, type = "raw")
+
+head(logistic_reg_pred_valid)
+
+logistic_reg_pred_valid_prob <- predict(logistic_reg, 
+                                        newdata = valid_df, type = "prob")
+
+head(logistic_reg_pred_valid_prob)
+
+
+install.packages("survival")
+install.packages("Hmisc")
+install.packages("Formula")
+
+library(survival)
+library(Formula)
+library(Hmisc)
+
+rcorr(as.matrix(train_df[, -c(5)]))
+
+library("Hmisc")
+rcorr(as.matrix(train_df[, -c(5)]))
+
+library(caret)
+confusionMatrix(as.factor(logistic_reg_pred_train), 
+                train_df$Advance, positive = "1")
+                
+con_mat_train <- confusionMatrix(as.factor(logistic_reg_pred_train), 
+                train_df$Advance, positive = "1")
+
+sensitivity_train <- con_mat_train$byClass[1]
+
+precision_train <- con_mat_train$byClass[3]
+
+f1_train <- 2/((1/sensitivity_train) + (1/precision_train))
+
+paste("The F1 score for traination is", f1_train)
+
+confusionMatrix(as.factor(logistic_reg_pred_valid), 
+                valid_df$Advance, positive = "1")
+                
+con_mat_valid <- confusionMatrix(as.factor(logistic_reg_pred_valid), 
+                valid_df$Advance, positive = "1")
+
+sensitivity_valid <- con_mat_valid$byClass[1]
+
+precision_valid <- con_mat_valid$byClass[3]
+
+f1_valid <- 2/((1/sensitivity_valid) + (1/precision_valid))
+
+paste("The F1 score for validation is", f1_valid)
+
+ROSE::roc.curve(valid_df$Advance, logistic_reg_pred_valid)
+
+new_songs <- read.csv("https://www.yeoda.net/condor/BUAN4310/logistic_songs/new_songs.csv", header = TRUE)
+new_songs
+
+names(new_songs)
+
+new_songs_filter <- new_songs[, c(4, 6, 10, 11)]
+new_songs_filter
+
+
+logistic_reg_pred_new_songs <- predict(logistic_reg, 
+                                   newdata = new_songs_filter, type = "raw")
+
+head(logistic_reg_pred_new_songs)
+
+logistic_reg_pred_new_songs_prob <- predict(logistic_reg, 
+                                   newdata = new_songs_filter, type = "prob")
+
+head(logistic_reg_pred_new_songs_prob)
+
+logistic_reg_pred_new_songs_df <- as.data.frame(logistic_reg_pred_new_songs)
+names(logistic_reg_pred_new_songs_df)[1] <- "Prediction"
+names(logistic_reg_pred_new_songs_prob)[2] <- "Probability"
+new_songs_prediction_df <- cbind(new_songs[c(2:3)], logistic_reg_pred_new_songs_df,
+                                 logistic_reg_pred_new_songs_prob[2]) 
+new_songs_prediction_df
