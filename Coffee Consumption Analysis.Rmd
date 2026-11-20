@@ -1,0 +1,106 @@
+---
+title: "Week 8 Assignment"
+date: "2024-05-16"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+runtime: shiny
+
+---
+
+Story:
+
+The popular coffee brewing methods and the distribution of coffee cups consumed by selected age groups. 
+URL for shinyapps.io: 
+
+```{r global, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+##install.packages("shinydashboard")
+##install.packages("tidytuesdayR")
+##install.packages("shiny")
+##install.packages("ggplot2")
+##install.packages("flexdashboard")
+##install.packages("shiny")
+##install.packages("ggiraph")
+##install.packages("plotly")
+##install.packages(c('ggplot2', 'shiny'))
+rsconnect::setAccountInfo(name='yohmiya',
+			  token='D9F029840036D847D58CA6C9731E2C3E',
+			  secret='I1kiovPI6uV/NLiFqZSxi0kqjAwsstw21QqI6FSH')
+library(tidyverse)
+coffee_survey <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-05-14/coffee_survey.csv')
+
+
+
+library(shiny)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(readr)
+
+# Load the dataset
+coffee_survey <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-05-14/coffee_survey.csv')
+
+# Extract the first method 
+coffee_survey$brew <- sapply(strsplit(as.character(coffee_survey$brew), ","), `[`, 1)
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Coffee Consumption Analysis"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("selectedAge", "Select Age Range:",
+                  choices = unique(coffee_survey$age)),
+      hr(),
+      h5("Distribution of coffee brewing methods"),
+      h5("Distribution of coffee cups consumed by selected age group")
+    ),
+    mainPanel(
+      plotlyOutput("brewingMethodsPlot"),
+      plotOutput("cupsByAgePlot")
+    )
+  )
+)
+
+
+
+# Define server logic
+server <- function(input, output) {
+  
+  # Plotly interactive bar chart for brewing methods
+  output$brewingMethodsPlot <- renderPlotly({
+    data <- coffee_survey %>%
+      filter(!is.na(brew)) %>%
+      group_by(brew) %>%
+      summarise(Count = n(), .groups = 'drop') %>%
+      arrange(Count)
+      
+    p <- ggplot(data, aes(x = brew, y = Count, fill = brew)) +
+      geom_bar(stat = "identity") +
+      labs(title = "Coffee Brewing Methods", y = "Count") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+    
+    ggplotly(p, tooltip = "text")
+  })
+  
+  
+  # Reactive ggplot2 bar chart for cups of coffee by age group
+  output$cupsByAgePlot <- renderPlot({
+    req(input$selectedAge)
+    
+    data <- coffee_survey %>%
+      filter(age == input$selectedAge & !is.na(cups) & cups != "NA") %>%
+      group_by(cups) %>%
+      summarise(Count = n(), .groups = 'drop')
+      
+    ggplot(data, aes(x = cups, y = Count, fill = cups)) +
+      geom_bar(stat = "identity") +
+      labs(title = paste("Cups of Coffee Consumed per Day (Age Group:", input$selectedAge, ")"),
+           x = "Cups per Day", y = "Frequency")
+  })
+}
+
+# Run the application
+shinyApp(ui, server)
+```
