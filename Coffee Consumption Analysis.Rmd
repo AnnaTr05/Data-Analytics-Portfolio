@@ -25,9 +25,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ##install.packages("ggiraph")
 ##install.packages("plotly")
 ##install.packages(c('ggplot2', 'shiny'))
-rsconnect::setAccountInfo(name='yohmiya',
-			  token='D9F029840036D847D58CA6C9731E2C3E',
-			  secret='I1kiovPI6uV/NLiFqZSxi0kqjAwsstw21QqI6FSH')
+
 library(tidyverse)
 coffee_survey <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-05-14/coffee_survey.csv')
 
