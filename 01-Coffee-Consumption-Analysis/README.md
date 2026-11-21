@@ -10,7 +10,7 @@ The goal of this project was to explore coffee consumption patterns using data a
 2. Exploratory Data Analysis (EDA)
 I dived in into 2 questions throughout the project in order to tell a story to audience:
 What are the distributions of different coffee brewing methods?
-How does daily coffee consumption vary across different age groups?b
+How does daily coffee consumption vary across different age groups?
 
 3. Data Visualization
 Chart 1: Distribution of coffee brewing methods.
