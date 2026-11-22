@@ -1,0 +1,194 @@
+---
+title: "Lab3DecisionTreeBUAN"
+output: html_document
+date: "2024-11-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+#1Import the data2, and partition the data into training (60%) and validation (40%) sets3. Choose your own seed:
+
+library(rpart)
+library(rpart.plot)
+library(forecast)
+library(caret)
+library(lattice)
+library(ggplot2)
+```{r}
+toyota <- read.csv("/Users/annatran/Downloads/ToyotaCorolla.csv", header = TRUE)
+head(toyota)
+```
+
+
+```{r}
+colnames(toyota) <- make.names(colnames(toyota))
+colnames(toyota)
+```
+
+```{r}
+toyota$Fuel_Type <- as.factor(toyota$Fuel_Type)
+```
+
+```{r}
+toyota$Automatic <- as.factor(toyota$Automatic)
+toyota$Doors <- as.factor(toyota$Doors)
+```
+
+
+```{r}
+toyota$Mfg_Guarantee <- as.factor(toyota$Mfr_Guarantee)
+toyota$Airco <- as.factor(toyota$Airco)
+toyota$Automatic_airco <- as.factor(toyota$Automatic_airco)
+toyota$CD_Player <- as.factor(toyota$CD_Player)
+toyota$Powered_Windows <- as.factor(toyota$Powered_Windows)
+toyota$Sport_Model <- as.factor(toyota$Sport_Model)
+toyota$Tow_Bar <- as.factor(toyota$Tow_Bar)
+```
+
+```{r}
+library(caret)
+set.seed(666)
+```
+
+
+```{r}
+index <- createDataPartition(toyota$Price, p = 0.6, list = FALSE)
+```
+
+```{r}
+train_df <- toyota[index, ]
+valid_df <- toyota[-index, ]
+```
+
+```{r}
+nrow(train_df)
+nrow(valid_df)
+```
+
+
+```{r}
+head(train_df)
+head(valid_df)
+```
+
+
+```{r}
+str(train_df)
+str(valid_df)
+```
+
+
+```{r}
+library(rpart)
+rt_model <- rpart(Price ~ Age_08_04 + KM + Fuel_Type + HP + Automatic + Doors + 
+Quarterly_Tax + Mfg_Guarantee + Guarantee_Period + Airco + 
+Automatic_airco + CD_Player + Powered_Windows + Sport_Model + Tow_Bar, 
+data = train_df, method = "anova")
+```
+
+
+```{r}
+library(rpart.plot)
+rpart.plot(rt_model, type = 2, fallen.leaves = TRUE, tweak = 1.2)
+printcp(rt_model)
+```
+
+
+
+#3Define the new record
+```{r}
+new_record <- data.frame(
+Age_08_04 = 77,
+KM = 117000,
+Fuel_Type = factor("Petrol", levels = levels(train_df$Fuel_Type)),  
+HP = 110,
+Automatic = factor(0, levels = levels(train_df$Automatic)), 
+Doors = factor(5, levels = levels(train_df$Doors)),  
+Quarterly_Tax = 100,
+Mfg_Guarantee = factor(0, levels = levels(train_df$Mfg_Guarantee)), 
+Guarantee_Period = 3,
+Airco = factor(1, levels = levels(train_df$Airco)),  
+Automatic_airco = factor(0, levels = levels(train_df$Automatic_Airco)),  
+CD_Player = factor(0, levels = levels(train_df$CD_Player)), 
+Powered_Windows = factor(0, levels = levels(train_df$Powered_Windows)),  
+Sport_Model = factor(0, levels = levels(train_df$Sport_Model)),  
+Tow_Bar = factor(1, levels = levels(train_df$Tow_Bar))) 
+```
+
+```{r}
+predicted_price <- predict(rt_model, new_record)
+predicted_price
+```
+
+
+
+#4
+
+```{r}
+toyota$cat_price <- ifelse(toyota$Price <= mean(toyota$Price, na.rm = TRUE), "0", "1")
+toyota$cat_price <- as.factor(toyota$cat_price)
+```
+
+```{r}
+table(toyota$cat_price)
+```
+
+```{r}
+index <- createDataPartition(toyota$cat_price, p = 0.6, list = FALSE)
+```
+
+```{r}
+train_df <- toyota[index, ]
+valid_df <- toyota[-index, ]
+```
+
+```{r}
+ct_model <- rpart(cat_price ~ Age_08_04 + KM + Fuel_Type + HP + Automatic + Doors + 
+Quarterly_Tax + Mfg_Guarantee + Guarantee_Period + Airco + 
+Automatic_airco + CD_Player + Powered_Windows + Sport_Model + Tow_Bar, 
+data = train_df, method = "class", 
+control = rpart.control(maxdepth = 3))
+```
+
+
+```{r}
+rpart.plot(ct_model, type = 2, fallen.leaves = TRUE, tweak = 1.2, main = "Classification Tree for Price Category")
+printcp(ct_model)
+```
+
+
+#5
+
+
+Predictors:
+The shallow tree, limited to a depth of 3, keeps things simple by focusing on only the most impactful predictors. At this depth, it will likely choose the most influential factors, like Age_08_04, KM, or HP, to make quick, meaningful splits. This makes it straightforward to interpret, showing only the strongest indicators of price upfront.
+In contrast, the full tree digs deeper, including more variables as it branches out, making it potentially more accurate but also more complicated and possibly prone to overfitting. The top predictors may overlap between the two trees, but the full tree will also pull in additional, less important variables as it goes deeper.
+
+Predictions:
+The shallow tree’s predictions are more generalized, based on broader categories created by fewer, larger splits. This can make its predictions more robust and adaptable to new data, though perhaps slightly less precise for individual cases.
+The full tree’s predictions are more tailored, taking into account a greater number of detailed conditions. This can make it more accurate for the specific cases it was trained on, but it also risks being too specific, potentially making it less dependable when applied to new data.
+If I am running a business, the shallow tree would likely be the better choice. It’s easier to interpret and apply, giving a clear picture of the main drivers of price without getting bogged down by excessive detail. Its simplicity also makes it more adaptable, which means I can be confident it will perform well on new data.
+
