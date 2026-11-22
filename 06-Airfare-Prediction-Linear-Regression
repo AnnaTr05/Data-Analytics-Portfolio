@@ -1,1 +1,83 @@
+# Airfare Prediction Using Linear Regression
 
+## Project Overview
+
+This project applies statistical analysis and predictive modeling to estimate average airline fares for new airport routes in the United States.
+
+Using a dataset of 638 air routes collected during the third quarter of 1996, the analysis investigates how factors such as route distance, passenger volume, city demographics, airport characteristics, and airline competition relate to airfare prices.
+
+The primary objective is to develop a Multiple Linear Regression model that predicts average airfare based on route and market characteristics.
+
+## Objectives
+
+- Import and prepare the airfare dataset.
+- Partition the data into training (60%) and validation (40%) sets.
+- Perform Exploratory Data Analysis (EDA).
+- Examine correlations between numerical predictors and airfare.
+- Identify important predictors of FARE.
+- Develop and interpret a Multiple Linear Regression model.
+- Predict airfare for a hypothetical new airport route.
+- Discuss predictor availability in a real-world implementation.
+- Propose a classification approach for categorizing fares as high or low.
+
+## Tools & Technologies
+
+- **Programming Language:** R
+- **Statistical Modeling:** Multiple Linear Regression
+- **Classification Method (proposed):** Logistic Regression
+- **Data Exploration:** Correlation Matrix, Scatterplots, Pairwise Plots
+- **Data Visualization:** `corrgram`, `ggplot2`
+- **Model Evaluation:** MAE, RMSE, MAPE
+- **Data Preparation:** Training and Validation Split
+
+## Methodology
+
+1. **Data Preparation:** Imported the airfare dataset and divided it into training and validation subsets.
+2. **Exploratory Data Analysis:** Examined numerical relationships using correlation matrices and scatterplots.
+3. **Feature Analysis:** Identified Distance as the strongest single numerical predictor of FARE.
+4. **Model Development:** Applied Multiple Linear Regression to estimate average airfare.
+5. **Prediction:** Generated airfare predictions for validation observations and a hypothetical new route.
+6. **Model Evaluation:** Assessed prediction errors using MAE, RMSE, and MAPE.
+7. **Classification Proposal:** Discussed Logistic Regression as a potential approach for predicting high versus low fares.
+
+## Key Findings
+
+- Distance was the strongest single numerical predictor of FARE, with a correlation of approximately 0.686.
+- The validation dataset produced the following prediction error metrics:
+
+| Metric | Result |
+|---|---:|
+| MAE | 27.61 |
+| RMSE | 35.59 |
+| MAPE | 21.15% |
+
+These results indicate that the model provides a useful baseline for airfare prediction, although prediction errors remain and further model improvements may be valuable.
+
+## Real-World Considerations
+
+Not all predictors are necessarily available before a new route begins operating. For example, passenger volume (PAX) may not be known in advance. A practical deployment would need to prioritize information available before route launch and account for unavailable operational data.
+
+## Classification Extension
+
+For the high/low airfare classification task, Logistic Regression was proposed as a suitable binary classification technique.
+
+Potential data transformations include encoding categorical variables and standardizing numerical predictors. Model performance could be evaluated using accuracy, precision, recall, and ROC-AUC.
+
+## Dataset
+
+The project uses `Airfares.csv`, containing information about 638 U.S. air routes from the third quarter of 1996.
+
+## Project Structure
+
+```text
+06-Airfare-Prediction-Linear-Regression/
+├── README.md
+├── Lab6BUANDATAMINING.Rmd
+├── Lab6BUANDATAMINING.html
+└── data/
+    └── Airfares.csv
+```
+
+## Conclusion
+
+This project demonstrates the application of exploratory data analysis, correlation analysis, and Multiple Linear Regression to an airfare prediction problem. It also highlights the importance of predictor availability when translating a statistical model into a real-world business application.
