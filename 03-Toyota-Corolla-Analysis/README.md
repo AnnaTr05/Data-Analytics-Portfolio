@@ -25,3 +25,14 @@ The project examines how vehicle characteristics contribute to used car prices.
 ## Files
 - Toyota Corolla Price Prediction.html
 
+## Key Findings
+
+- **Vehicle Age:** Age is one of the most important factors influencing used Toyota Corolla prices. Older vehicles generally have lower resale values.
+
+- **Mileage (KM):** Higher mileage tends to reduce vehicle resale prices, as vehicles with more kilometers driven are generally less valuable.
+
+- **Horsepower (HP):** Engine horsepower is another factor considered by the regression tree when identifying price differences between vehicles.
+
+- **Shallow vs. Full Regression Tree:** The shallow regression tree (maximum depth of 3) provides a simpler and more interpretable model by focusing on the most influential predictors. The full regression tree captures more detailed relationships but is more complex and may be more prone to overfitting.
+
+- **Model Selection:** The shallow tree may be more practical for business applications because it is easier to interpret and communicate while highlighting the key factors affecting resale prices.
